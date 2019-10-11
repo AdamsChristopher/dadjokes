@@ -1,6 +1,12 @@
 <template>
   <div>
-    Jokes
+    <SearchJokes v-on:search-text="searchText"/>
+    <Joke
+      v-for="joke in jokes"
+      v-bind:key="joke.id"
+      v-bind:id="joke.id"
+      v-bind:joke="joke.joke"
+    />
   </div>
 </template>
 
@@ -8,39 +14,60 @@
 import axios from "axios";
 
 import Joke from "../../components/Joke";
+import SearchJokes from "../../components/SearchJokes";
 
 export default {
-
+  components: {
+    Joke,
+    SearchJokes
+  },
   data() {
     return {
       jokes: []
     }
   },
-
   async created() {
     const config = {
-      "Accept": "application/json"
+      headers: {
+        "Accept": "application/json"
+      }
     }
-
     try {
       const res = await axios.get(
         "https://icanhazdadjoke.com/search",
         config
       );
-      this.data = res.data.results;
+      this.jokes = res.data.results;
     } catch (err) {
       console.log(err);
     }
-
   },
+  methods: {
+    async searchText(text) {
+      const config = {
+        headers: {
+          Accept: "application/json"
+        }
+      };
 
+      try {
+        const res = await axios.get(
+          `https://icanhazdadjoke.com/search?term=${text}`,
+          config
+        );
+        this.jokes = res.data.results;
+      } catch(err) {
+        console.log(err);
+      }
+    }
+  },
   head() {
     return {
       title: "Dad Jokes",
       meta: [
         {
           hid: "description",
-          name: "descriptions",
+          name: "description",
           content: "The best place for corny dad jokes"
         }
       ]
